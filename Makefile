@@ -13,7 +13,8 @@ objects+=die.o \
 	 dlist.o \
 	 incache.o \
 	 lncache.o \
-	 mapcache.o
+	 mapcache.o \
+	 lut.o
 
 $(libaoc): $(objects)
 	gcc $(CFLAGS )-shared -o $@ $^ 
