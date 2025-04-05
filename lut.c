@@ -1,17 +1,21 @@
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include <aoc/lut.h>
 
+#if 0
 struct aoc_lut_node {
 	unsigned long key;
 	struct aoc_lut *lut;
 	struct aoc_lut_node *link;
 };
+#endif
 
 struct aoc_lut {
 	size_t shift;
 	size_t size;
+	size_t data_size;
 	aoc_hashfn hashfn;
 	struct aoc_lut_node *table[];
 };
@@ -48,7 +52,7 @@ static struct aoc_lut *init_lut(struct aoc_lut *lut)
 	return lut;
 }
 
-struct aoc_lut *aoc_new_lut(size_t shift, aoc_hashfn hashfn)
+struct aoc_lut *aoc_new_lut(size_t shift, size_t data_size, aoc_hashfn hashfn)
 {
 	size_t size;
 	struct aoc_lut *lut;
@@ -60,6 +64,7 @@ struct aoc_lut *aoc_new_lut(size_t shift, aoc_hashfn hashfn)
 
 	lut->shift = shift;
 	lut->size = 1 << shift;
+	lut->data_size = data_size;
 	lut->hashfn = hashfn;
 	return init_lut(lut);
 }
@@ -93,10 +98,11 @@ struct aoc_lut_node *new_lut_node(struct aoc_lut_node **nodepp,
 {
 	struct aoc_lut_node *node;
 	assert(nodepp != NULL);
-	if ((node = malloc(sizeof * node)) != NULL) {
+	if ((node = malloc(sizeof * node + (lut->data_size))) != NULL) {
 		node->key = key;
 		node->lut = lut;
 		node->link = NULL;
+		memset(node->data, 0, lut->data_size);
 		*nodepp = node;
 	}
 	return node;
@@ -173,9 +179,23 @@ struct aoc_lut_node *aoc_lut_lookup(struct aoc_lut *lut, unsigned long key)
 	return NULL;
 }
 
-void *aoc_lut_container(struct aoc_lut *lut, size_t offset)
+int aoc_lut_node_idx(struct aoc_lut *lut, struct aoc_lut_node **nodepp,
+	size_t i)
 {
-	char *ptr = (char *)lut;
-	return (void*)(ptr - offset);
+	int ret;
+	assert(lut != NULL);
+	assert(nodepp != NULL);
+	ret = -1;
+	if (i < lut->size) {
+		*nodepp = lut->table[i];
+		ret = 0;
+	}
+	return ret;
+}
+
+void *aoc_lut_node_data(struct aoc_lut_node *node)
+{
+	assert(node != NULL);
+	return (void*)(&node->data[0]);
 }
 
