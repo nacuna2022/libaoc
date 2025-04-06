@@ -41,12 +41,12 @@ struct aoc_stack *aoc_new_stack(size_t data_size)
 void aoc_free_stack(struct aoc_stack *stack)
 {
 	assert(stack != NULL);
-	while(aoc_pop_stack(stack, NULL) != -1);
+	while(aoc_stack_pop(stack, NULL) != -1);
 	free(stack);
 	return;
 }
 
-int aoc_push_stack(struct aoc_stack *stack, void *data)
+int aoc_stack_push(struct aoc_stack *stack, void *data)
 {
 	int ret = -1;
 	assert(stack != NULL);
@@ -60,7 +60,7 @@ int aoc_push_stack(struct aoc_stack *stack, void *data)
 	return ret;
 }
 
-int aoc_pop_stack(struct aoc_stack *stack, void *data)
+int aoc_stack_pop(struct aoc_stack *stack, void *data)
 {
 	int err = -1;
 	struct stack_data *d;
@@ -70,6 +70,7 @@ int aoc_pop_stack(struct aoc_stack *stack, void *data)
 		stack->top = d->prev;
 		if (data)
 			memcpy(data, d->data, stack->data_size);
+		free(d);
 		err = 0;
 	}
 	return err; 
