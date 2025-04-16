@@ -30,11 +30,14 @@ int aoc_mapcache_step_down(struct aoc_mapcache *cache);
 int aoc_mapcache_step_left(struct aoc_mapcache *cache);
 int aoc_mapcache_step_right(struct aoc_mapcache *cache);
 
-/* somtimes we just want to "peek" at a direction */
+/* sometimes we just want to "peek" at a direction */
 int aoc_mapcache_peek_up(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_down(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_left(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_right(struct aoc_mapcache *cache);
+
+/* for when we need the coord of the current tile */
+void aoc_mapcache_coord(struct aoc_mapcache *cache, int *x, int *y);
 
 #endif /* __AOC_MAP_CACHE_H__ */
 

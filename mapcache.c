@@ -259,3 +259,14 @@ int aoc_mapcache_peek_right(struct aoc_mapcache *cache)
 	return -1;
 }
 
+void aoc_mapcache_coord(struct aoc_mapcache *cache, int *x, int *y)
+{
+	unsigned long idx;
+	assert(cache != NULL);
+	assert(x != NULL);
+	assert(y != NULL);
+	idx = (unsigned long)cache->pos - (unsigned long)cache->start;
+	*x = idx / cache->linesize;
+	*y = idx % cache->linesize;
+	return;
+}
