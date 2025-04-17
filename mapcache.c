@@ -270,3 +270,30 @@ void aoc_mapcache_coord(struct aoc_mapcache *cache, int *x, int *y)
 	*y = idx % cache->linesize;
 	return;
 }
+
+int aoc_mapcache_goto_tile(struct aoc_mapcache *cache, unsigned long tile_id)
+{
+	unsigned long id;
+	int tile;
+	assert(cache != NULL);
+	
+	/* change the start point because we need to walk the map */
+	cache->pos = &cache->data[0];
+	for (;;) {
+		tile = aoc_mapcache_tile(cache, &id);
+		if (id == tile_id)
+			return tile;
+		
+		if (aoc_mapcache_walk_forward(cache) == -1)
+			break;
+	}
+	return -1;
+}
+
+void aoc_mapcache_change_tile(struct aoc_mapcache *cache, int tile)
+{
+	assert(cache != NULL);
+	*(cache->pos) = ((char)tile) & 0xFF;
+	return;
+}
+
