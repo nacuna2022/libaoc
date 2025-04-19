@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <aoc/mapcache.h>
 #include <aoc/incache.h>
@@ -40,6 +41,11 @@ static void init_mapcache(struct aoc_mapcache *cache,
 	return;
 }
 
+static struct aoc_mapcache *new_mapcache(size_t mapsize)
+{
+	return malloc(sizeof(struct aoc_mapcache) + mapsize);
+}
+
 struct aoc_mapcache *aoc_new_mapcache(char *pathname)
 {
 	struct aoc_incache *incache;
@@ -49,11 +55,26 @@ struct aoc_mapcache *aoc_new_mapcache(char *pathname)
 	if (incache == NULL)
 		return NULL;
 	rawsize = aoc_incache_size(incache);
-	cache = malloc(sizeof(struct aoc_mapcache) + rawsize);
+	cache = new_mapcache(rawsize);
 	if (cache != NULL) {
 		init_mapcache(cache, incache);
 	}
 	aoc_free_incache(incache);
+	return cache;
+}
+
+struct aoc_mapcache *aoc_new_mapcache_grid(int x, int y, int tile)
+{
+	struct aoc_mapcache *cache;
+	assert(x > 0);
+	assert(y > 0);
+	if ((cache = new_mapcache(x * y)) != NULL) {
+		memset(cache->data, tile, x * y);
+		cache->linesize = y;
+		cache->pos = &cache->data[0];
+		cache->size = x * y;
+		aoc_mapcache_set_start(cache);
+	}
 	return cache;
 }
 
