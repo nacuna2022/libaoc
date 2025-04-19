@@ -34,6 +34,13 @@ int aoc_mapcache_step_down(struct aoc_mapcache *cache);
 int aoc_mapcache_step_left(struct aoc_mapcache *cache);
 int aoc_mapcache_step_right(struct aoc_mapcache *cache);
 
+/* we can also "warp" which is basically stepping off from the side and 
+ * appearing on the other side. */
+int aoc_mapcache_warp_up(struct aoc_mapcache *cache);
+int aoc_mapcache_warp_down(struct aoc_mapcache *cache);
+int aoc_mapcache_warp_left(struct aoc_mapcache *cache);
+int aoc_mapcache_warp_right(struct aoc_mapcache *cache);
+
 /* sometimes we just want to "peek" at a direction */
 int aoc_mapcache_peek_up(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_down(struct aoc_mapcache *cache);

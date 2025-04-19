@@ -318,3 +318,72 @@ void aoc_mapcache_change_tile(struct aoc_mapcache *cache, int tile)
 	return;
 }
 
+int aoc_mapcache_warp_up(struct aoc_mapcache *cache)
+{
+	int tile;
+	assert(cache != NULL);
+	tile = aoc_mapcache_step_up(cache);
+	if (tile == -1) {
+		/* if we cannot go up, that means we need to warp down */
+		char *ptr;
+		ptr = (cache->pos + cache->size) - cache->linesize;
+		cache->pos = ptr;
+		tile = aoc_mapcache_tile(cache, NULL);
+		assert(aoc_mapcache_step_down(cache) == -1);
+	}
+	return tile;
+}
+
+int aoc_mapcache_warp_down(struct aoc_mapcache *cache)
+{
+	int tile;
+	assert(cache != NULL);
+	tile = aoc_mapcache_step_down(cache);
+	if (tile == -1) {
+		/* if we cannot go down, that means we need to warp up */
+		char *ptr;
+		ptr = (cache->pos - cache->size) + cache->linesize;
+		cache->pos = ptr;
+		tile = aoc_mapcache_tile(cache, NULL);
+		assert(aoc_mapcache_step_up(cache) == -1);
+	}
+	return tile;
+}
+
+int aoc_mapcache_warp_left(struct aoc_mapcache *cache)
+{
+	int tile;
+	assert(cache != NULL);
+	tile = aoc_mapcache_step_left(cache);
+	if (tile == -1) {
+		/* if we cannot go left, that means we need to warp right */
+		char *ptr;
+		ptr = cache->pos + (cache->linesize - 1);
+		cache->pos = ptr;
+		tile = aoc_mapcache_tile(cache, NULL);
+		assert(aoc_mapcache_step_right(cache) == -1);
+	}
+	return tile;
+}
+
+int aoc_mapcache_warp_right(struct aoc_mapcache *cache)
+{
+	int tile;
+	assert(cache != NULL);
+	tile = aoc_mapcache_step_right(cache);
+	if (tile == -1) {
+		/* if we cannot go up, that means we need to warp left */
+		char *ptr;
+		ptr = cache->pos - (cache->linesize - 1);
+		cache->pos = ptr;
+		tile = aoc_mapcache_tile(cache, NULL);
+		assert(aoc_mapcache_step_left(cache) == -1);
+	}
+	return tile;
+}
+
+#if 0
+012
+345
+678
+#endif
