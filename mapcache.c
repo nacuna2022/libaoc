@@ -382,8 +382,3 @@ int aoc_mapcache_warp_right(struct aoc_mapcache *cache)
 	return tile;
 }
 
-#if 0
-012
-345
-678
-#endif
