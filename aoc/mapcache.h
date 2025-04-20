@@ -61,5 +61,8 @@ int aoc_mapcache_goto_tile(struct aoc_mapcache *cache, unsigned long tile_id);
 /* for when we need to change a tile to something else */
 void aoc_mapcache_change_tile(struct aoc_mapcache *cache, int tile);
 
+/* for when we want to print the map */
+void aoc_mapcache_show(struct aoc_mapcache *cache);
+
 #endif /* __AOC_MAP_CACHE_H__ */
 

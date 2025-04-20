@@ -400,3 +400,15 @@ int aoc_mapcache_height(struct aoc_mapcache *cache)
 	return aoc_mapcache_size(cache) / aoc_mapcache_width(cache);
 }
 
+void aoc_mapcache_show(struct aoc_mapcache *cache)
+{
+	int i;
+	assert(cache != NULL);
+	for (i = 0; i < cache->size; i += 1) {
+		if ((i % cache->linesize) == 0)
+			printf("\n");
+		printf("%c", cache->data[i]);
+	}
+	return;
+}
+
