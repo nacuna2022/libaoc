@@ -15,6 +15,11 @@ struct aoc_mapcache *aoc_new_mapcache_grid(int x, int y, int tile);
 
 void aoc_free_mapcache(struct aoc_mapcache *cache);
 
+/* mapcache dimensions */
+int aoc_mapcache_size(struct aoc_mapcache *cache);
+int aoc_mapcache_width(struct aoc_mapcache *cache);
+int aoc_mapcache_height(struct aoc_mapcache *cache);
+
 /* determine what kind of tile we are stepping on */
 int aoc_mapcache_tile(struct aoc_mapcache *cache, unsigned long *tile_id);
 

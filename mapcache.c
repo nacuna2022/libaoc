@@ -382,3 +382,21 @@ int aoc_mapcache_warp_right(struct aoc_mapcache *cache)
 	return tile;
 }
 
+int aoc_mapcache_size(struct aoc_mapcache *cache)
+{
+	assert(cache != NULL);
+	return cache->size;
+}
+
+int aoc_mapcache_width(struct aoc_mapcache *cache)
+{
+	assert(cache != NULL);
+	return cache->linesize;
+}
+
+int aoc_mapcache_height(struct aoc_mapcache *cache)
+{
+	assert(cache != NULL);
+	return aoc_mapcache_size(cache) / aoc_mapcache_width(cache);
+}
+
