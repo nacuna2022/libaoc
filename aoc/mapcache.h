@@ -64,5 +64,8 @@ void aoc_mapcache_change_tile(struct aoc_mapcache *cache, int tile);
 /* for when we want to print the map */
 void aoc_mapcache_show(struct aoc_mapcache *cache);
 
+/* for when we want to create a copy of the mapcache */
+struct aoc_mapcache *aoc_mapcache_dup(struct aoc_mapcache *cache);
+
 #endif /* __AOC_MAP_CACHE_H__ */
 

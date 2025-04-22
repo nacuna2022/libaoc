@@ -412,3 +412,18 @@ void aoc_mapcache_show(struct aoc_mapcache *cache)
 	return;
 }
 
+struct aoc_mapcache *aoc_mapcache_dup(struct aoc_mapcache *cache)
+{
+	struct aoc_mapcache *cache_dup;
+	int x;
+	int y;
+	assert(cache != NULL);
+	x = cache->size / cache->linesize;
+	y = cache->linesize;
+	cache_dup = aoc_new_mapcache_grid(x, y, 0);
+	if (cache_dup != NULL) {
+		memcpy(cache_dup->data, cache->data, cache->size);
+	}
+	return cache_dup;
+}
+
