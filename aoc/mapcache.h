@@ -11,7 +11,7 @@ struct aoc_mapcache;
 struct aoc_mapcache *aoc_new_mapcache(char *pathname);
 
 /* sometimes, we want to make a mapcache without any input file backing it */
-struct aoc_mapcache *aoc_new_mapcache_grid(int x, int y, int tile);
+struct aoc_mapcache *aoc_new_mapcache_grid(int row, int col, int tile);
 
 void aoc_free_mapcache(struct aoc_mapcache *cache);
 

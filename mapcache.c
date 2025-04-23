@@ -63,16 +63,16 @@ struct aoc_mapcache *aoc_new_mapcache(char *pathname)
 	return cache;
 }
 
-struct aoc_mapcache *aoc_new_mapcache_grid(int x, int y, int tile)
+struct aoc_mapcache *aoc_new_mapcache_grid(int row, int col, int tile)
 {
 	struct aoc_mapcache *cache;
-	assert(x > 0);
-	assert(y > 0);
-	if ((cache = new_mapcache(x * y)) != NULL) {
-		memset(cache->data, tile, x * y);
-		cache->linesize = y;
+	assert(row > 0);
+	assert(col > 0);
+	if ((cache = new_mapcache(row * col)) != NULL) {
+		memset(cache->data, tile, row * col);
+		cache->linesize = col;
 		cache->pos = &cache->data[0];
-		cache->size = x * y;
+		cache->size = row * col;
 		aoc_mapcache_set_start(cache);
 	}
 	return cache;
@@ -409,6 +409,7 @@ void aoc_mapcache_show(struct aoc_mapcache *cache)
 			printf("\n");
 		printf("%c", cache->data[i]);
 	}
+	printf("\n");
 	return;
 }
 
