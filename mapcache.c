@@ -99,6 +99,14 @@ void aoc_mapcache_reset(struct aoc_mapcache *cache)
 	return;
 }
 
+void aoc_mapcache_absolute_reset(struct aoc_mapcache *cache)
+{
+	assert(cache != NULL);
+	cache->pos = &cache->data[0];
+	aoc_mapcache_set_start(cache);
+	return;
+}
+
 static bool out_of_bounds(struct aoc_mapcache *cache, char *pos)
 {
 	char *start = cache->data;

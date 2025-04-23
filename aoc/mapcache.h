@@ -29,6 +29,10 @@ int aoc_mapcache_tile(struct aoc_mapcache *cache, unsigned long *tile_id);
 void aoc_mapcache_set_start(struct aoc_mapcache *cache);
 void aoc_mapcache_reset(struct aoc_mapcache *cache);
 
+/* sometimes, we want an "absolute" reset where the starting point is 
+ * tile (0,0), the first tile */
+void aoc_mapcache_absolute_reset(struct aoc_mapcache *cache);
+
 /* sometimes, we need to "walk" the entire map too look for something - like
  * to look for the starting point. "walking" has the effect of 
  * going to the next level or row when you step off the map on its side. */
