@@ -37,6 +37,7 @@ static int dequeue_one(struct aoc_queue *q, void *dst)
 		if (dst) {
 			mempcpy(dst, qn->data, q->data_size);
 		}
+		free(qn);
 		ret = 0;
 	}
 	return ret;
