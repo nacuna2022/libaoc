@@ -53,4 +53,4 @@ clean:
 	rm -rf *.d
 	rm -rf *.so
 
--include $(.c=.d)
+-include $(objects:.o=.d)

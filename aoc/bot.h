@@ -1,6 +1,8 @@
 #ifndef __AOC_BOT_H__
 #define __AOC_BOT_H__
 
+#include <aoc/dir.h>
+
 /* some AOC puzzles (specifically those dealing with maps) require a "walker".
  * we define a "bot" that keeps track of the direction where it is facing 
  * (or going) and can map the relative direction to the cardinal direction. 
@@ -11,15 +13,6 @@
  * the intention is to use this with mapcaches which work only with cardinal 
  * directions up, down, left & right.
  * */
-
-enum aoc_direction {
-	aoc_direction_up = 0,
-	aoc_direction_right,
-	aoc_direction_down,
-	aoc_direction_left,
-	aoc_direction_limit,
-};
-
 struct aoc_bot;
 
 struct aoc_bot *aoc_new_bot(enum aoc_direction facing);

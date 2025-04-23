@@ -428,3 +428,89 @@ struct aoc_mapcache *aoc_mapcache_dup(struct aoc_mapcache *cache)
 	return cache_dup;
 }
 
+int aoc_mapcache_find_marker(struct aoc_mapcache *cache, int tile)
+{
+	char *save_pos;
+	assert(cache != NULL);
+
+	/* save the current position in case we did not find the marker tile */
+	save_pos = cache->pos;
+
+	for (;;) {
+		if (aoc_mapcache_walk_forward(cache) == -1) {
+			break;
+		}
+
+		int what = aoc_mapcache_tile(cache, NULL);
+		if (what == tile) {
+			return what;
+		}
+	}
+
+	cache->pos = save_pos;
+	return - 1;
+}
+
+int aoc_mapcache_peek_dir(struct aoc_mapcache *cache, enum aoc_direction dir)
+{
+	assert(cache != NULL);
+	switch(dir) {
+	case aoc_direction_up:
+		return aoc_mapcache_peek_up(cache);
+	case aoc_direction_right:
+		return aoc_mapcache_peek_right(cache);
+	case aoc_direction_down:
+		return aoc_mapcache_peek_down(cache);
+	case aoc_direction_left:
+		return aoc_mapcache_peek_left(cache);
+	default:
+		assert(0);
+		break;
+	}
+	/* won't reach here */
+	assert(0);
+	return -1;
+}
+
+int aoc_mapcache_step_dir(struct aoc_mapcache *cache, enum aoc_direction dir)
+{
+	assert(cache != NULL);
+	switch(dir) {
+	case aoc_direction_up:
+		return aoc_mapcache_step_up(cache);
+	case aoc_direction_right:
+		return aoc_mapcache_step_right(cache);
+	case aoc_direction_down:
+		return aoc_mapcache_step_down(cache);
+	case aoc_direction_left:
+		return aoc_mapcache_step_left(cache);
+	default:
+		assert(0);
+		break;
+	}
+	/* won't reach here */
+	assert(0);
+	return -1;
+}
+
+int aoc_mapcache_warp_dir(struct aoc_mapcache *cache, enum aoc_direction dir)
+{
+	assert(cache != NULL);
+	switch(dir) {
+	case aoc_direction_up:
+		return aoc_mapcache_warp_up(cache);
+	case aoc_direction_right:
+		return aoc_mapcache_warp_right(cache);
+	case aoc_direction_down:
+		return aoc_mapcache_warp_down(cache);
+	case aoc_direction_left:
+		return aoc_mapcache_warp_left(cache);
+	default:
+		assert(0);
+		break;
+	}
+	/* won't reach here */
+	assert(0);
+	return -1;
+}
+

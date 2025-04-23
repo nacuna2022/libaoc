@@ -1,6 +1,8 @@
 #ifndef __AOC_MAP_CACHE_H__
 #define __AOC_MAP_CACHE_H__
 
+#include <aoc/dir.h>
+ 
 /* advent of code uses a lot of maps where we need to 
  * process up, down, left and right. indexes with maps just dont make sense
  * anymore - so we don't use them here.
@@ -39,6 +41,9 @@ int aoc_mapcache_step_down(struct aoc_mapcache *cache);
 int aoc_mapcache_step_left(struct aoc_mapcache *cache);
 int aoc_mapcache_step_right(struct aoc_mapcache *cache);
 
+/* add support for parameterized step direction */
+int aoc_mapcache_step_dir(struct aoc_mapcache *cache, enum aoc_direction dir);
+
 /* we can also "warp" which is basically stepping off from the side and 
  * appearing on the other side. */
 int aoc_mapcache_warp_up(struct aoc_mapcache *cache);
@@ -46,11 +51,17 @@ int aoc_mapcache_warp_down(struct aoc_mapcache *cache);
 int aoc_mapcache_warp_left(struct aoc_mapcache *cache);
 int aoc_mapcache_warp_right(struct aoc_mapcache *cache);
 
+/* add support for parameterized warp direction */
+int aoc_mapcache_warp_dir(struct aoc_mapcache *cache, enum aoc_direction dir);
+
 /* sometimes we just want to "peek" at a direction */
 int aoc_mapcache_peek_up(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_down(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_left(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_right(struct aoc_mapcache *cache);
+
+/* add support for parameterized peek direction */
+int aoc_mapcache_peek_dir(struct aoc_mapcache *cache, enum aoc_direction dir);
 
 /* for when we need the coord of the current tile */
 void aoc_mapcache_coord(struct aoc_mapcache *cache, int *x, int *y);
@@ -66,6 +77,12 @@ void aoc_mapcache_show(struct aoc_mapcache *cache);
 
 /* for when we want to create a copy of the mapcache */
 struct aoc_mapcache *aoc_mapcache_dup(struct aoc_mapcache *cache);
+
+/* sometimes, a map has a unique "marker" tile were walkers like robot will
+ * start walking from. we use this to set the internal map pointer to that 
+ * tile. this will stop on the first encounter of that tile. */
+int aoc_mapcache_find_marker(struct aoc_mapcache *cache, int tile);
+
 
 #endif /* __AOC_MAP_CACHE_H__ */
 
