@@ -17,7 +17,8 @@ objects+=die.o \
 	 lut.o \
 	 stack.o \
 	 bot.o \
-	 queue.o
+	 queue.o \
+	 minheap.o
 
 $(libaoc): $(objects)
 	gcc $(CFLAGS )-shared -o $@ $^ 
