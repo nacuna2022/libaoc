@@ -68,7 +68,7 @@ int aoc_mapcache_peek_right(struct aoc_mapcache *cache);
 int aoc_mapcache_peek_dir(struct aoc_mapcache *cache, enum aoc_direction dir);
 
 /* for when we need the coord of the current tile */
-void aoc_mapcache_coord(struct aoc_mapcache *cache, int *x, int *y);
+void aoc_mapcache_coord(struct aoc_mapcache *cache, int *row, int *col);
 
 /* for when we need to jump to a tile we visited prior */
 int aoc_mapcache_goto_tile(struct aoc_mapcache *cache, unsigned long tile_id);
