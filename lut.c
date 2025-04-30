@@ -43,7 +43,7 @@ struct aoc_lut *aoc_new_lut(size_t shift, size_t keylen, size_t datalen)
 	}
 
 	size = (sizeof(struct lut_node *) * (1 << shift));
-	if ((lut = malloc(sizeof(struct aoc_lut) + size)) == NULL) {
+	if ((lut = malloc(sizeof(struct aoc_lut) + size)) != NULL) {
 		int i;
 		lut->shift = shift;
 		lut->keylen = keylen;
@@ -55,9 +55,36 @@ struct aoc_lut *aoc_new_lut(size_t shift, size_t keylen, size_t datalen)
 	return lut;
 }
 
+static void free_lut_node(struct lut_node *node)
+{
+	assert(node != NULL);
+	free(node->key);
+	free(node);
+	return;
+}
+
+static void free_hash_chain(struct lut_node *node)
+{
+	struct lut_node *curnode;
+	assert(node != NULL);
+	for (curnode = node; curnode != NULL; ) {
+		struct lut_node *tmp;
+		tmp = curnode->link;
+		free_lut_node(curnode);
+		curnode = tmp;
+	}
+	return;
+}
+
 void aoc_free_lut(struct aoc_lut *lut)
 {
+	int i;
 	assert(lut != NULL);
+	for (i = 0; i < (1 << lut->shift); i += 1) {
+		if (lut->hash_table[i] != NULL) {
+			free_hash_chain(lut->hash_table[i]);
+		}
+	}
 	free(lut);
 	return;
 }
@@ -84,6 +111,8 @@ static int init_node(struct aoc_lut *lut, struct lut_node *node,
 	if ((ptr = malloc(keylen)) != NULL) {
 		memcpy(ptr, key, keylen);
 		node->key = ptr;
+		node->lut = lut;
+		node->link = NULL;
 		
 		/* now do the rest */
 		memcpy(node->data, data, datalen);
@@ -102,10 +131,12 @@ static int new_lut_node(struct aoc_lut *lut, struct lut_node **nodepp,
 	assert(*nodepp == NULL);
 	if ((node = malloc(sizeof(struct lut_node) + datalen)) != NULL) {
 		ret = init_node(lut, node, key, keylen, data, datalen);
+		*nodepp = node;
 		ret = 0;
 	}
 	return ret;
 }
+
 
 int aoc_lut_add(struct aoc_lut *lut, void *key, size_t keylen, 
 	void *data, size_t datalen)
@@ -174,6 +205,7 @@ int aoc_lut_lookup(struct aoc_lut *lut, void *key, size_t keylen,
 
 		/* found in our hash table */
 		if (lutkey_equal(lut, key, node->key) == true) {
+			memcpy(data, node->data, datalen);
 			ret = 0;
 			break;
 		}
@@ -185,7 +217,37 @@ int aoc_lut_lookup(struct aoc_lut *lut, void *key, size_t keylen,
 
 int aoc_lut_remove(struct aoc_lut *lut, void *key, size_t keylen)
 {
-	return 0;
+	int ret = -1;
+	unsigned long idx;
+	struct lut_node **nodepp;
+	assert(lut != NULL);
+	assert(key != NULL);
+	assert(keylen == lut->keylen);
+
+	/* generate a hash table index from our key and normalize it to 
+	 * our hash table size */
+	idx = fnv1a(key, keylen);
+	idx = idx & ((1 << lut->shift) - 1);
+
+	nodepp = &lut->hash_table[idx];
+	for (;;) {
+		struct lut_node *node = *nodepp;
+		if (node == NULL) {
+			break;
+		}
+
+		/* found in our hash table */
+		if (lutkey_equal(lut, key, node->key) == true) {
+			struct lut_node *tmp = *nodepp;
+			*nodepp = tmp->link;
+			free_lut_node(tmp);
+			ret = 0;
+			break;
+		}
+
+		nodepp = &(node->link);
+	}
+	return ret;
 }
 
 #if 0
