@@ -250,192 +250,57 @@ int aoc_lut_remove(struct aoc_lut *lut, void *key, size_t keylen)
 	return ret;
 }
 
-#if 0
-struct aoc_lut {
-	size_t shift;
-	size_t size;
-	size_t data_size;
-	aoc_hashfn hashfn;
-	struct aoc_lut_node *table[];
-};
-
-static unsigned long fnv1a(void *data, size_t data_size)
+static int hash_chain_item_count(struct lut_node *node)
 {
-        size_t i;
-        unsigned char *pdata = (unsigned char *)data;
-        static const unsigned long fnv1a_offset = 0xcbf29ce484222325;
-        static const unsigned long fnv1a_prime = 0x100000001b3;
-        unsigned long h;
-        h = fnv1a_offset;
-        for (i = 0; i < data_size; i++) {
-                h = h ^ pdata[i];
-                h = h * fnv1a_prime;
-        }
-        return h;
-}
-
-static unsigned long compute_hash(struct aoc_lut *lut, void *data,
-	size_t data_size)
-{
-	if (lut->hashfn)
-		return lut->hashfn(data, data_size);
-	return fnv1a(data, data_size);
-}
-
-static struct aoc_lut *init_lut(struct aoc_lut *lut)
-{
-	size_t i;
-	for (i = 0; i < lut->size; i += 1) {
-		lut->table[i] = NULL;
+	int count = 0;
+	struct lut_node *curnode;
+	if (node != NULL) {
+		for (curnode = node; curnode != NULL; curnode = curnode->link) 
+			count += 1;
 	}
-	return lut;
+	return count;
 }
 
-struct aoc_lut *aoc_new_lut(size_t shift, size_t data_size, aoc_hashfn hashfn)
+int aoc_lut_item_count(struct aoc_lut *lut)
 {
-	size_t size;
-	struct aoc_lut *lut;
-	assert(shift > 0);
+	int i;
+	int count = 0;
+	if (lut == NULL)
+		return -1;
+	for (i = 0; i < (1 << lut->shift); i += 1) {
+		if (lut->hash_table[i] != NULL) {
+			count += hash_chain_item_count(lut->hash_table[i]);
+		}
+	}
+	return count;
+}
+
+static void hash_chain_item_callback(struct lut_node *node,
+	aoc_lut_callback cb, void *cb_param)
+{
+	struct lut_node *curnode;
+	if (node != NULL) {
+		for (curnode = node; curnode != NULL; curnode = curnode->link) {
+			cb(curnode->key, curnode->data, cb_param);
+		}
+	}
+	return;
+}
+
+int aoc_lut_foreach(struct aoc_lut *lut, aoc_lut_callback cb, void *cb_param)
+{
+	int i;
+	if (lut == NULL)
+		return -1;
+	if (cb == NULL)
+		return -1;
 	
-	size = sizeof(struct aoc_lut) + (sizeof(struct aoc_lut_node *) * (1 << shift));
-	if ((lut = malloc(size)) == NULL)
-		return NULL;
-
-	lut->shift = shift;
-	lut->size = 1 << shift;
-	lut->data_size = data_size;
-	lut->hashfn = hashfn;
-	return init_lut(lut);
-}
-
-static void free_lut_chain(struct aoc_lut_node *node)
-{
-	while(node) {
-		struct aoc_lut_node *tmp = node->link;
-		free(node);
-		node = tmp;
-	}
-	return;
-}
-
-void aoc_free_lut(struct aoc_lut *lut)
-{
-	size_t i;
-	assert(lut != NULL);
-	for (i = 0; i < lut->size; i += 1) {
-		if (lut->table[i] == NULL)
-			continue;
-		free_lut_chain(lut->table[i]);
-		lut->table[i] = NULL;
-	}
-	free(lut);
-	return;
-}
-
-struct aoc_lut_node *new_lut_node(struct aoc_lut_node **nodepp,
-	struct aoc_lut *lut, unsigned long key)
-{
-	struct aoc_lut_node *node;
-	assert(nodepp != NULL);
-	if ((node = malloc(sizeof * node + (lut->data_size))) != NULL) {
-		node->key = key;
-		node->lut = lut;
-		node->link = NULL;
-		memset(node->data, 0, lut->data_size);
-		*nodepp = node;
-	}
-	return node;
-}
-
-struct aoc_lut_node *aoc_lut_add(struct aoc_lut *lut, unsigned long key)
-{
-	size_t idx;
-	struct aoc_lut_node **nodepp;
-	struct aoc_lut_node *node;
-	assert(lut != NULL);
-	idx = compute_hash(lut, &key, sizeof(key));
-	idx = idx & (lut->size - 1);
-	nodepp = &lut->table[idx];
-	for (;;) {
-		node = *nodepp;
-		if (node == NULL)
-			break;
-
-		if (node->key == key)
-			return node;
-
-		nodepp = &(node->link);
-	}
-	return new_lut_node(nodepp, lut, key);
-}
-
-void aoc_lut_remove(struct aoc_lut_node *node)
-{
-	size_t idx;
-	struct aoc_lut *lut;
-	struct aoc_lut_node **nodepp;
-	struct aoc_lut_node *tmp;
-	assert(node != NULL);
-	assert(node->lut != NULL);
-	lut = node->lut;
-	idx = compute_hash(lut, &node->key, sizeof(node->key));
-	idx = idx & (lut->size - 1);
-	nodepp = &lut->table[idx];
-	for (;;) {
-		tmp = *nodepp;
-		if (tmp == NULL)
-			break;
-
-		if (tmp == node) {
-			*nodepp = tmp->link;
-			free(tmp);
-			break;
+	for (i = 0; i < (1 << lut->shift); i += 1) {
+		if (lut->hash_table[i] != NULL) {
+			hash_chain_item_callback(lut->hash_table[i],
+				cb, cb_param);
 		}
-		nodepp = &(tmp->link);
 	}
-	return;
+	
+	return 0;
 }
-
-struct aoc_lut_node *aoc_lut_lookup(struct aoc_lut *lut, unsigned long key)
-{
-	size_t idx;
-	struct aoc_lut_node **nodepp;
-	struct aoc_lut_node *tmp;
-	assert(lut != NULL);
-	idx = compute_hash(lut, &key, sizeof key);
-	idx = idx & (lut->size - 1);
-	nodepp = &lut->table[idx];
-	for (;;) {
-		tmp = *nodepp;
-		if (tmp == NULL)
-			break;
-
-		if (tmp->key == key) {
-			return tmp;
-		}
-		nodepp = &(tmp->link);
-	}
-	return NULL;
-}
-
-int aoc_lut_node_idx(struct aoc_lut *lut, struct aoc_lut_node **nodepp,
-	size_t i)
-{
-	int ret;
-	assert(lut != NULL);
-	assert(nodepp != NULL);
-	ret = -1;
-	if (i < lut->size) {
-		*nodepp = lut->table[i];
-		ret = 0;
-	}
-	return ret;
-}
-
-void *aoc_lut_node_data(struct aoc_lut_node *node)
-{
-	assert(node != NULL);
-	return (void*)(&node->data[0]);
-}
-#endif
-
