@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include <aoc/minheap.h>
+#include <aoc/priority_queue.h>
 
-struct minheap_node {
+struct prio_queue_node {
 	int key;
 	void *payload[0];
 };
@@ -18,59 +18,60 @@ given a child node i, we can locate its parent:
 	pi = (i - 1) >> 1
 #endif
 
-struct aoc_minheap {
+struct aoc_priority_queue {
 #define HEAP_GROW_SIZE 	1
 	size_t size;
 	size_t count;
 	size_t payload_size;
-	struct minheap_node *heap[0];
+	struct prio_queue_node *heap[0];
 };
 
-static void init_heap(struct aoc_minheap *heap, size_t payload_size)
+static void init_priority_queue(struct aoc_priority_queue *prio_queue,
+	size_t payload_size)
 {
-	assert(heap != NULL);
-	heap->size = HEAP_GROW_SIZE;
-	heap->count = 0;
-	heap->payload_size = payload_size;
+	assert(prio_queue != NULL);
+	prio_queue->size = HEAP_GROW_SIZE;
+	prio_queue->count = 0;
+	prio_queue->payload_size = payload_size;
 	return;
 }
 
-struct aoc_minheap *aoc_new_minheap(size_t payload_size)
+struct aoc_priority_queue *aoc_new_priority_queue(size_t payload_size)
 {
-	struct aoc_minheap *heap;
-	size_t heap_size = sizeof(struct minheap_node *) * HEAP_GROW_SIZE;
-	if ((heap = malloc(sizeof(struct aoc_minheap) + heap_size))) {
-		init_heap(heap, payload_size);
+	struct aoc_priority_queue *heap;
+	size_t heap_size = sizeof(struct prio_queue_node *) * HEAP_GROW_SIZE;
+	if ((heap = malloc(sizeof(struct aoc_priority_queue) + heap_size))) {
+		init_priority_queue(heap, payload_size);
 	}
 	return heap;
 }
 
 
-static void free_all_heap_nodes(struct aoc_minheap *heap)
+static void free_all_heap_nodes(struct aoc_priority_queue *heap)
 {
 	assert(heap != NULL);
 	int key;
 	for (;;) {
-		if (aoc_minheap_get(heap, &key, NULL, 0) == -1) {
+		if (aoc_priority_queue_get_min(heap, &key, NULL, 0) == -1) {
 			break;
 		}
 	}
 	return;
 }
 
-void aoc_free_minheap(struct aoc_minheap *minheap)
+void aoc_free_priority_queue(struct aoc_priority_queue *prio_queue)
 {
-	assert(minheap != NULL);
-	free_all_heap_nodes(minheap);
-	free(minheap);
+	assert(prio_queue != NULL);
+	free_all_heap_nodes(prio_queue);
+	free(prio_queue);
 	return;
 }
 
-static struct minheap_node *new_minheap_node(int key, void *payload,
+static struct prio_queue_node *new_priority_queue_node(int key, void *payload,
 	size_t payload_size)
 {
-	struct minheap_node *node;
-	if ((node = malloc(sizeof(struct minheap_node) + payload_size)) != NULL) {
+	struct prio_queue_node *node;
+	if ((node = malloc(sizeof(struct prio_queue_node) + payload_size)) != NULL) {
 		node->key = key;
 		if (payload != NULL) {
 			memcpy(node->payload, payload, payload_size);
@@ -79,27 +80,27 @@ static struct minheap_node *new_minheap_node(int key, void *payload,
 	return node;
 }
 
-static struct aoc_minheap *enlarge_minheap(struct aoc_minheap *heap)
+static struct aoc_priority_queue *enlarge_minheap(struct aoc_priority_queue *heap)
 {
-	struct aoc_minheap *tmp_heap;
+	struct aoc_priority_queue *tmp_heap;
 	assert(heap != NULL);
-	size_t new_size = sizeof(struct minheap_node *) * (heap->size + HEAP_GROW_SIZE);
-	if ((tmp_heap = realloc(heap, sizeof(struct aoc_minheap) + new_size)) != NULL) {
+	size_t new_size = sizeof(struct prio_queue_node *) * (heap->size + HEAP_GROW_SIZE);
+	if ((tmp_heap = realloc(heap, sizeof(struct aoc_priority_queue) + new_size)) != NULL) {
 		tmp_heap->size += HEAP_GROW_SIZE;
 	}
 	return tmp_heap;
 }
 
-static void heapify_up(struct aoc_minheap *heap)
+static void heapify_up(struct aoc_priority_queue *heap)
 {
 	size_t last_idx;
 	assert(heap != NULL);
 	last_idx = heap->count - 1;
 	while(last_idx > 0) {
 		size_t pi;
-		struct minheap_node *parent;
-		struct minheap_node *child;
-		struct minheap_node *tmp;
+		struct prio_queue_node *parent;
+		struct prio_queue_node *child;
+		struct prio_queue_node *tmp;
 
 		/* get parent */
 		pi = (last_idx - 1) >> 1;
@@ -123,21 +124,22 @@ static void heapify_up(struct aoc_minheap *heap)
 	return;
 }
 
-static void insert_node(struct aoc_minheap **heap, struct minheap_node *node)
+static void insert_node(struct aoc_priority_queue **prio_queue,
+	struct prio_queue_node *node)
 {
-	assert(heap != NULL);
+	assert(prio_queue != NULL);
 	assert(node != NULL);
 
-	/* enlarge the heap if we need to */
-	while ((*heap)->count >= (*heap)->size) {
-		struct aoc_minheap *new_minheap;
-		new_minheap = enlarge_minheap(*heap);
+	/* enlarge the prio_queue if we need to */
+	while ((*prio_queue)->count >= (*prio_queue)->size) {
+		struct aoc_priority_queue *new_minheap;
+		new_minheap = enlarge_minheap(*prio_queue);
 		assert(new_minheap != NULL);
-		if (new_minheap != *heap)
-			*heap = new_minheap;
+		if (new_minheap != *prio_queue)
+			*prio_queue = new_minheap;
 	}
 
-	struct aoc_minheap *h = *heap;
+	struct aoc_priority_queue *h = *prio_queue;
 	/* now we can insert at the last */
 	h->heap[h->count] = node;
 	h->count += 1;
@@ -148,25 +150,25 @@ static void insert_node(struct aoc_minheap **heap, struct minheap_node *node)
 	return;
 }
 
-int aoc_minheap_insert(struct aoc_minheap **minheap, int key, void *payload, 
-	size_t payload_size)
+int aoc_priority_queue_insert(struct aoc_priority_queue **prio_queue, int key,
+	void *payload, size_t payload_size)
 {
 	int err = -1;
-	struct minheap_node *node;
-	assert(minheap != NULL);
+	struct prio_queue_node *node;
+	assert(prio_queue != NULL);
 
 	if (payload != NULL) 
-		assert((*minheap)->payload_size <= payload_size);
+		assert((*prio_queue)->payload_size <= payload_size);
 	
-	node = new_minheap_node(key, payload, (*minheap)->payload_size);
+	node = new_priority_queue_node(key, payload, (*prio_queue)->payload_size);
 	if (node != NULL) {
-		insert_node(minheap, node);
+		insert_node(prio_queue, node);
 		err = 0;
 	}
 	return err;
 }
 
-static void heapify_down(struct aoc_minheap *heap)
+static void heapify_down(struct aoc_priority_queue *heap)
 {
 	size_t pi = 0;
 	size_t li;
@@ -174,10 +176,10 @@ static void heapify_down(struct aoc_minheap *heap)
 
 	assert(heap != NULL);
 	for(;;) {
-		struct minheap_node *smallest;
-		struct minheap_node *parent;
-		struct minheap_node *left = NULL;
-		struct minheap_node *right = NULL;
+		struct prio_queue_node *smallest;
+		struct prio_queue_node *parent;
+		struct prio_queue_node *left = NULL;
+		struct prio_queue_node *right = NULL;
 		
 		li = (2 * pi) + 1;
 		ri = (2 * pi) + 2;
@@ -210,7 +212,7 @@ static void heapify_down(struct aoc_minheap *heap)
 		}
 
 		/* swap parent with smallest */
-		struct minheap_node *tmp = heap->heap[pi];
+		struct prio_queue_node *tmp = heap->heap[pi];
 		if (smallest == left) {
 			heap->heap[pi] = heap->heap[li];
 			heap->heap[li] = tmp;
@@ -224,13 +226,13 @@ static void heapify_down(struct aoc_minheap *heap)
 	return;
 }
 
-int aoc_minheap_get(struct aoc_minheap *heap, int *key, void *payload,
-	size_t payload_size)
+int aoc_priority_queue_get_min(struct aoc_priority_queue *heap,	int *key,
+	void *payload, size_t payload_size)
 {
-	struct minheap_node *node;
+	struct prio_queue_node *node;
 	assert(heap != NULL);
 
-	if (aoc_minheap_peek(heap, key, payload, payload_size) == -1) {
+	if (aoc_priority_queue_peek(heap, key, payload, payload_size) == -1) {
 		return -1;
 	}
 
@@ -242,10 +244,10 @@ int aoc_minheap_get(struct aoc_minheap *heap, int *key, void *payload,
 	return 0;
 }
 
-int aoc_minheap_peek(struct aoc_minheap *heap, int *key, void *payload,
-	size_t payload_size)
+int aoc_priority_queue_peek(struct aoc_priority_queue *heap, int *key,
+	void *payload, size_t payload_size)
 {
-	struct minheap_node *node;
+	struct prio_queue_node *node;
 	assert(heap != NULL);
 	assert(key != NULL);
 	if (heap->count < 1) {

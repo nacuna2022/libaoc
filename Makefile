@@ -18,7 +18,7 @@ objects+=die.o \
 	 stack.o \
 	 bot.o \
 	 queue.o \
-	 minheap.o
+	 priority_queue.o
 
 $(libaoc): $(objects)
 	gcc $(CFLAGS )-shared -o $@ $^ 
